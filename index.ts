@@ -24,6 +24,8 @@ export default class Context extends EventEmitter {
 
 	private _parent: Context | undefined = undefined;
 
+	private _timeoutMS: number = 0;
+
 	private _timeout: NodeJS.Timeout | undefined;
 
 	constructor(config?: Config) {
@@ -62,11 +64,13 @@ export default class Context extends EventEmitter {
 
 		if ("number" === typeof opts.Timeout) {
 			if (opts.Timeout > 0) {
+				this._timeoutMS = opts.Timeout;
+
 				this._timeout = setTimeout(() => {
 					this.cleanup(); // run prior to running Cancel()
 
 					this.Cancel(Context.ERROR_CONTEXT_TIMED_OUT.message);
-				}, opts.Timeout);
+				}, this._timeoutMS);
 			}
 		}
 	}
@@ -96,6 +100,33 @@ export default class Context extends EventEmitter {
 
 	public cancel(reason?: string | Error): void {
 		this.Cancel(reason);
+	}
+
+	public Restore(): void {
+		if (!this._done) {
+			return;
+		}
+
+		if (this._parent) {
+			if (this._parent.Done()) {
+				return;
+			}
+		}
+
+		this._done = false;
+		this.cleanup();
+
+		if (this._timeoutMS > 0) {
+			this._timeout = setTimeout(() => {
+				this.cleanup(); // run prior to running Cancel()
+
+				this.Cancel(Context.ERROR_CONTEXT_TIMED_OUT.message);
+			}, this._timeoutMS);
+		}
+	}
+
+	public restore(): void {
+		this.Restore();
 	}
 
 	public Done(): boolean {

@@ -143,5 +143,30 @@ describe("Context", () => {
 		expect(ctxDoneCallback).toHaveBeenCalledTimes(1);
 		expect(ctxDoneCallback).toHaveBeenCalledWith(Context.ERROR_CONTEXT_TIMED_OUT);
 		expect(ctx.Done()).toBe(true);
+
+		const ctxDoneCallback2 = jest.fn();
+		ctx.on("done", ctxDoneCallback2);
+		ctx.Restore();
+
+		expect(ctxDoneCallback2).not.toBeCalled();
+		expect(ctx.Done()).toBe(false);
+
+		jest.advanceTimersByTime(1000);
+		expect(ctxDoneCallback2).not.toBeCalled();
+		expect(ctx.Done()).toBe(false);
+
+		await expect(
+			BluebirdPromise.all([
+				ctx.WhenDone(),
+				new BluebirdPromise((resolve) => {
+					jest.advanceTimersByTime(1000);
+					resolve();
+				})
+			])
+		).resolves.not.toThrow();
+
+		expect(ctxDoneCallback2).toHaveBeenCalledTimes(1);
+		expect(ctxDoneCallback2).toHaveBeenCalledWith(Context.ERROR_CONTEXT_TIMED_OUT);
+		expect(ctx.Done()).toBe(true);
 	});
 });
