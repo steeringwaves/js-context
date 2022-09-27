@@ -1,5 +1,5 @@
 {
-	"name": "@steeringwaves/js-context",
+	"name": "@steeringwaves/context",
 	"version": "0.0.1",
 	"description": "node context library",
 	"author": "steeringwaves",
