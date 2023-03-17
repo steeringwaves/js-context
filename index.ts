@@ -1,7 +1,7 @@
 import * as BluebirdPromise from "bluebird";
+import * as _ from "lodash";
 
-const EventEmitter = require("events");
-const _ = require("lodash");
+import { EventEmitter } from "events";
 
 BluebirdPromise.config({
 	// Enable cancellation
