@@ -30,6 +30,7 @@ export default class Context extends EventEmitter {
 
 	constructor(config?: Config) {
 		super();
+		this.setMaxListeners(Infinity);
 
 		const opts: Config = _.defaultsDeep(config, <Config>{
 			Parent: undefined,
